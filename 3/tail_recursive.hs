@@ -1,6 +1,5 @@
 module Main where
 
--- Tail-recursive factorization for Project Euler #3
 target :: Integer
 target = 600851475143
 

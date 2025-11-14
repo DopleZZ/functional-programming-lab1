@@ -1,12 +1,12 @@
 module Main where
 
--- Modular style: generate corner numbers, filter and sum
 target :: Integer
 target = 1001
 
 cornersForLayer :: Integer -> [Integer]
-cornersForLayer k = [s*s - m*(s-1) | m <- [0..3]]
-  where s = 2*k + 1
+cornersForLayer k = [s * s - m * (s - 1) | m <- [0 .. 3]]
+  where
+    s = 2 * k + 1
 
 layers :: Integer -> [[Integer]]
 layers n = [cornersForLayer k | k <- [1 .. (n - 1) `div` 2]]

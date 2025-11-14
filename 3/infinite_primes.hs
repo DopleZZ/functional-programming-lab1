@@ -1,7 +1,5 @@
 module Main where
 
--- Use an infinite list of primes (simple sieve) and factor by dividing by primes
-
 target :: Integer
 target = 600851475143
 

@@ -1,6 +1,5 @@
 module Main where
 
-
 target = 600851475143
 
 candidates :: Integer -> [Integer]

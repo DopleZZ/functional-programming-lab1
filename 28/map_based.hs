@@ -1,6 +1,5 @@
 module Main where
 
-
 target :: Integer
 target = 1001
 

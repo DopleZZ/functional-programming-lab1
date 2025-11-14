@@ -1,6 +1,5 @@
 module Main where
 
--- Tail-recursive summation over spiral layers
 target :: Integer
 target = 1001
 

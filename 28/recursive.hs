@@ -1,6 +1,5 @@
 module Main where
 
--- Simple recursive computation (not tail) for spiral sum
 target :: Integer
 target = 1001
 
