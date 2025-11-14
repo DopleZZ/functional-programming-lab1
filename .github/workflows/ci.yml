@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    name: Lint, Format, Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haskell/actions/setup@v2
+        with:
+          ghc-version: '9.4.8'
+          enable-stack: false
+          enable-cabal: true
+      - name: Install tools (hlint, ormolu)
+        run: |
+          cabal update
+          cabal install hlint ormolu --overwrite-policy=always
+      - name: Ensure tools on PATH
+        run: echo "$HOME/.cabal/bin" >> $GITHUB_PATH
+      - name: Lint (hlint)
+        run: bash scripts/lint.sh
+      - name: Format check (ormolu)
+        run: bash scripts/format-check.sh
+      - name: Unit tests (runghc outputs)
+        run: bash scripts/test_hs.sh
