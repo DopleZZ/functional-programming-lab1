@@ -14,7 +14,7 @@ isPrimeSimple n
   | n < 2 = False
   | n == 2 = True
   | even n = False
-  | otherwise = null [x | x <- [3,5 .. floor (sqrt (fromIntegral n))], n `mod` x == 0]
+  | otherwise = null [x | x <- [3, 5 .. floor (sqrt (fromIntegral n))], n `mod` x == 0]
 
 main :: IO ()
 main = print (foldr max 1 primeDivisors)

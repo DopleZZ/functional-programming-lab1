@@ -15,12 +15,26 @@ jobs:
           ghc-version: '9.4.8'
           enable-stack: false
           enable-cabal: true
+      - name: Cache cabal
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cabal/packages
+            ~/.cabal/store
+            ~/.cabal/bin
+          key: ${{ runner.os }}-cabal-ghc-9.4.8-tools-${{ hashFiles('scripts/lint.sh', 'scripts/format-check.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-cabal-ghc-9.4.8-tools-
       - name: Install tools (hlint, ormolu)
         run: |
           cabal update
           cabal install hlint ormolu --overwrite-policy=always
-      - name: Ensure tools on PATH
-        run: echo "$HOME/.cabal/bin" >> $GITHUB_PATH
+          echo "$HOME/.cabal/bin" >> $GITHUB_PATH
+      - name: Show tool versions
+        run: |
+          ghc --version
+          hlint --version
+          ormolu --version
       - name: Lint (hlint)
         run: bash scripts/lint.sh
       - name: Format check (ormolu)
