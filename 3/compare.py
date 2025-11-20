@@ -1,6 +1,3 @@
-# Simple Python implementations for comparison
-# Two approaches: trial division (simple) and generator-based using primes
-
 target = 600851475143
 
 def largest_prime_trial(n):

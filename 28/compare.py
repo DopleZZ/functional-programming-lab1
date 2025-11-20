@@ -1,5 +1,3 @@
-# Python comparator for Project Euler 28
-
 def spiral_sum(n):
     total = 1
     for k in range(1, (n - 1)//2 + 1):

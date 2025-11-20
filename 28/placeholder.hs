@@ -8,7 +8,6 @@ cornersForLayer k = [s * s - m * (s - 1) | m <- [0 .. 3]]
   where
     s = 2 * k + 1
 
-
 layers :: [[Integer]]
 layers = [cornersForLayer k | k <- [1 ..]]
 

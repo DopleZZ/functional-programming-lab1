@@ -5,11 +5,11 @@ target = 1001
 
 main :: IO ()
 main =
-    print $
-        1
-            + sum
-                [ s * s - m * (s - 1)
-                | k <- [1 .. (target - 1) `div` 2]
-                , let s = 2 * k + 1
-                , m <- [0 .. 3]
-                ]
+  print $
+    1
+      + sum
+        [ s * s - m * (s - 1)
+        | k <- [1 .. (target - 1) `div` 2],
+          let s = 2 * k + 1,
+          m <- [0 .. 3]
+        ]
