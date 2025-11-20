@@ -1,89 +1,30 @@
-name: lab1-tests
+name: lab-3
 
-on:
-  push:
-  pull_request:
+on: 
+    push
 
 jobs:
-  stack-ci:
-    name: Stack Lint/Format/Outputs
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      matrix:
-        ghc: [9.4.8]
-        resolver: [lts-22.4]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    test:
+        runs-on: ubuntu-latest
+        steps: 
+            - uses: actions/checkout@v4
+            - uses: haskell/actions/setup@v2
+              with:
+                  ghc-version: '9.4'
+                  cabal-version: '3.8'
+            
+            - name: Install dependencies
+              run: |
+                  cd lab1
+                  stack build --test --bench --no-run-tests --no-run-benchmarks
+                  stack build hlint
+                  stack build ormolu
 
-      - name: Setup Stack
-        uses: haskell/actions/setup@v2
-        with:
-          enable-stack: true
-          stack-version: 'latest'
-
-      - name: Cache Stack
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.stack
-            ~/.local/bin
-          key: ${{ runner.os }}-stack-${{ matrix.ghc }}-${{ matrix.resolver }}-${{ hashFiles('**/*.hs') }}
-          restore-keys: |
-            ${{ runner.os }}-stack-${{ matrix.ghc }}-${{ matrix.resolver }}-
-
-      - name: Stack setup (GHC)
-        run: stack --resolver ${{ matrix.resolver }} setup
-
-      - name: Install tooling (hlint, ormolu)
-        run: |
-          stack --resolver ${{ matrix.resolver }} install hlint ormolu
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Show versions
-        run: |
-          stack --version
-          stack exec -- ghc --version || true
-          hlint --version
-          ormolu --version
-
-      - name: Format check (ormolu)
-        run: |
-          FILES=$(git ls-files '*.hs')
-          if [ -z "$FILES" ]; then echo 'No Haskell files'; exit 0; fi
-          ormolu --mode check $FILES
-
-      - name: HLint (fail on hints)
-        run: |
-          FILES=$(git ls-files '*.hs')
-          if [ -z "$FILES" ]; then echo 'No Haskell files'; exit 0; fi
-          hlint $FILES > hlint-report.txt || true
-          cat hlint-report.txt
-          grep -E '^(Hint|Warning|Error):' hlint-report.txt && { echo 'HLint suggestions found'; exit 1; } || echo 'No hlint suggestions.'
-
-      - name: Run solution output checks
-        run: |
-          set -euo pipefail
-          EXPECT_3=6857
-          EXPECT_28=669171001
-          failures=0
-          echo '--- Problem 3 ---'
-          for f in $(git ls-files '3/*.hs'); do
-            out=$(stack runghc "$f") || { echo "RUNTIME FAIL: $f"; failures=$((failures+1)); continue; }
-            if [ "$out" != "$EXPECT_3" ]; then echo "WRONG: $f -> $out (expected $EXPECT_3)"; failures=$((failures+1)); else echo "OK: $f"; fi
-          done
-          echo '--- Problem 28 ---'
-          for f in $(git ls-files '28/*.hs'); do
-            out=$(stack runghc "$f") || { echo "RUNTIME FAIL: $f"; failures=$((failures+1)); continue; }
-            if [ "$out" != "$EXPECT_28" ]; then echo "WRONG: $f -> $out (expected $EXPECT_28)"; failures=$((failures+1)); else echo "OK: $f"; fi
-          done
-          if [ $failures -gt 0 ]; then echo "FAILED: $failures mismatches"; exit 1; fi
-          echo 'All outputs correct.'
-
-      - name: Upload hlint report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: hlint-report
-          path: hlint-report.txt
+            - name: Run tests
+              run: stack test
+              
+            - name: Run HLint
+              run: stack exec -- hlint .
+              
+            - name: Check formatting with ormolu
+              run: find src app test -name "*.hs" -exec stack exec -- ormolu --mode check {} \;
