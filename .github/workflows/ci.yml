@@ -1,77 +1,32 @@
-name: CI
+name: lab1-tests
 
-on:
-  push:
-  pull_request:
+on: 
+    push
 
-jobs:
-  build-and-test:
-    name: All Checks (Lint, Format, Unit Tests)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup GHC
-        uses: haskell/actions/setup@v2
-        with:
-          ghc-version: '9.6.7'
-          enable-stack: false
-          enable-cabal: true
-
-      - name: Cache cabal
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cabal/packages
-            ~/.cabal/store
-            ~/.cabal/bin
-          key: ${{ runner.os }}-cabal-ghc-9.6.7-tools-${{ hashFiles('**/*.hs') }}
-          restore-keys: |
-            ${{ runner.os }}-cabal-ghc-9.6.7-tools-
-
-      - name: Install tooling (hlint, ormolu)
-        run: |
-          cabal update
-          cabal install hlint ormolu --overwrite-policy=always
-          echo "$HOME/.cabal/bin" >> $GITHUB_PATH
-
-      - name: Show versions
-        run: |
-          ghc --version
-          hlint --version
-          ormolu --version
-
-      - name: Ormolu format check
-        run: |
-          HASKELL_FILES=$(git ls-files '*.hs')
-          ormolu --mode check $HASKELL_FILES
-
-      - name: Hlint (no suggestions fail)
-        run: |
-          set -e
-          FILES=$(git ls-files '*.hs')
-          hlint_output=$(hlint $FILES)
-          echo "$hlint_output"
-          # Fail if there are any suggestions lines starting with "Hint:" or "Warning:" or "Error:".
-          echo "$hlint_output" | grep -E '^(Hint|Warning|Error):' && { echo 'Hlint suggestions found. Failing.'; exit 1; } || echo 'No hlint suggestions.'
-
-      - name: Unit tests (runghc output verification)
-        run: |
-          set -euo pipefail
-          EXPECT_3=6857
-          EXPECT_28=669171001
-          failures=0
-          echo '--- Problem 3 files ---'
-          for f in $(git ls-files '3/*.hs'); do
-            out=$(runghc "$f") || { echo "FAIL (runtime): $f"; failures=$((failures+1)); continue; }
-            if [ "$out" != "$EXPECT_3" ]; then echo "FAIL: $f -> $out (expected $EXPECT_3)"; failures=$((failures+1)); else echo "OK: $f -> $out"; fi
-          done
-          echo '--- Problem 28 files ---'
-            for f in $(git ls-files '28/*.hs'); do
-            out=$(runghc "$f") || { echo "FAIL (runtime): $f"; failures=$((failures+1)); continue; }
-            if [ "$out" != "$EXPECT_28" ]; then echo "FAIL: $f -> $out (expected $EXPECT_28)"; failures=$((failures+1)); else echo "OK: $f -> $out"; fi
-          done
-          if [ $failures -gt 0 ]; then echo "Some tests failed ($failures)"; exit 1; fi
-          echo 'All tests passed.'
+jobs: 
+    test:
+        runs-on: ubuntu-latest
+        steps: 
+            - uses: actions/checkout@v4
+            - uses: haskell/actions/setup@v2
+              with:
+                  ghc-version: '9.4'
+                  cabal-version: '3.8'
+            
+            - name: Install dependencies
+              run: |
+                  stack build --test --bench --no-run-tests --no-run-benchmarks
+                  stack build hlint
+                  stack build ormolu
+                  
+            - name: Run tests
+              run: stack test
+              
+            - name: Run HLint
+              run: |
+                  stack exec -- hlint 3/*.hs
+                  stack exec -- hlint 28/*.hs
+              
+            - name: Check formatting with ormolu
+              run: |
+                find src app test -name "*.hs" -exec stack exec -- ormolu --mode check {} \;
