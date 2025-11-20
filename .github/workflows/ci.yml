@@ -19,14 +19,78 @@ jobs:
                   stack build hlint
                   stack build ormolu
                   
-            - name: Run tests
-              run: stack test
-              
-            - name: Run HLint
-              run: |
-                  stack exec -- hlint 3/*.hs
-                  stack exec -- hlint 28/*.hs
-              
-            - name: Check formatting with ormolu
-              run: |
-                find src app test -name "*.hs" -exec stack exec -- ormolu --mode check {} \;
+            name: CI
+
+            on:
+              push:
+              pull_request:
+
+            jobs:
+              stack-all:
+                name: Stack Lint, Format, Unit Tests
+                runs-on: ubuntu-latest
+                timeout-minutes: 15
+                steps:
+                  - name: Checkout
+                    uses: actions/checkout@v4
+
+                  - name: Setup Haskell (Stack)
+                    uses: haskell/actions/setup@v2
+                    with:
+                      enable-stack: true
+                      stack-version: 'latest'
+
+                  - name: Cache Stack
+                    uses: actions/cache@v4
+                    with:
+                      path: |
+                        ~/.stack
+                        ~/.local/bin
+                      key: ${{ runner.os }}-stack-${{ hashFiles('**/*.hs') }}
+                      restore-keys: |
+                        ${{ runner.os }}-stack-
+
+                  - name: Stack setup (install GHC)
+                    run: stack setup
+
+                  - name: Install tools via Stack (hlint, ormolu)
+                    run: |
+                      stack install hlint ormolu
+                      echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+                  - name: Show versions
+                    run: |
+                      stack --version
+                      stack exec -- ghc --version || true
+                      hlint --version
+                      ormolu --version
+
+                  - name: Ormolu format check
+                    run: |
+                      HASKELL_FILES=$(git ls-files '*.hs')
+                      ormolu --mode check $HASKELL_FILES
+
+                  - name: Hlint (fail on hints)
+                    run: |
+                      set -e
+                      FILES=$(git ls-files '*.hs')
+                      hlint $FILES
+
+                  - name: Unit tests (stack runghc output verification)
+                    run: |
+                      set -euo pipefail
+                      EXPECT_3=6857
+                      EXPECT_28=669171001
+                      failures=0
+                      echo '--- Problem 3 files ---'
+                      for f in $(git ls-files '3/*.hs'); do
+                        out=$(stack runghc "$f") || { echo "FAIL (runtime): $f"; failures=$((failures+1)); continue; }
+                        if [ "$out" != "$EXPECT_3" ]; then echo "FAIL: $f -> $out (expected $EXPECT_3)"; failures=$((failures+1)); else echo "OK: $f -> $out"; fi
+                      done
+                      echo '--- Problem 28 files ---'
+                      for f in $(git ls-files '28/*.hs'); do
+                        out=$(stack runghc "$f") || { echo "FAIL (runtime): $f"; failures=$((failures+1)); continue; }
+                        if [ "$out" != "$EXPECT_28" ]; then echo "FAIL: $f -> $out (expected $EXPECT_28)"; failures=$((failures+1)); else echo "OK: $f -> $out"; fi
+                      done
+                      if [ $failures -gt 0 ]; then echo "Some tests failed ($failures)"; exit 1; fi
+                      echo 'All tests passed.'
