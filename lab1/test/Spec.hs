@@ -4,7 +4,6 @@ module Main (main) where
 
 import System.Exit (exitFailure)
 
--- Largest prime factor of 600851475143 should be 6857
 targetPF :: Integer
 targetPF = 600851475143
 
@@ -19,7 +18,6 @@ primeFactors n = go n 2 []
 largestPrimeFactor :: Integer -> Integer
 largestPrimeFactor = maximum . primeFactors
 
--- Spiral diagonals sum for 1001x1001 should be 669171001
 spiralSize :: Integer
 spiralSize = 1001
 
