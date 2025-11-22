@@ -6,6 +6,9 @@ on:
 jobs:
     test:
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: lab1
         steps: 
             - uses: actions/checkout@v4
             - uses: haskell/actions/setup@v2
@@ -15,10 +18,8 @@ jobs:
             
             - name: Install dependencies
               run: |
-                  cd lab1
                   stack build --test --bench --no-run-tests --no-run-benchmarks
-                  stack build hlint
-                  stack build ormolu
+                  stack build hlint ormolu
 
             - name: Run tests
               run: stack test
