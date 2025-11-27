@@ -1,7 +1,4 @@
-module Main where
-
-target :: Integer
-target = 600851475143
+module Euler3.InfinitePrimes (largestPrimeUsingPrimes) where
 
 primes :: [Integer]
 primes = sieve [2 ..]
@@ -19,6 +16,3 @@ primeFactorsUsingPrimes n = go n primes []
 
 largestPrimeUsingPrimes :: Integer -> Integer
 largestPrimeUsingPrimes = maximum . primeFactorsUsingPrimes
-
-main :: IO ()
-main = print (largestPrimeUsingPrimes target)

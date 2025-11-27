@@ -29,3 +29,6 @@ jobs:
               
             - name: Check formatting with ormolu
               run: find src app test -name "*.hs" -exec stack exec -- ormolu --mode check {} \;
+
+
+              

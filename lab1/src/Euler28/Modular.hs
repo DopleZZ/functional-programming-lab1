@@ -1,7 +1,4 @@
-module Main where
-
-target :: Integer
-target = 1001
+module Euler28.Modular (spiralSumModular) where
 
 cornersForLayer :: Integer -> [Integer]
 cornersForLayer k = [s * s - m * (s - 1) | m <- [0 .. 3]]
@@ -11,5 +8,5 @@ cornersForLayer k = [s * s - m * (s - 1) | m <- [0 .. 3]]
 layers :: Integer -> [[Integer]]
 layers n = [cornersForLayer k | k <- [1 .. (n - 1) `div` 2]]
 
-main :: IO ()
-main = print $ 1 + sum (map sum (layers target))
+spiralSumModular :: Integer -> Integer
+spiralSumModular n = 1 + sum (map sum (layers n))

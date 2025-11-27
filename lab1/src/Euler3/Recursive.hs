@@ -1,7 +1,4 @@
-module Main where
-
-target :: Integer
-target = 600851475143
+module Euler3.Recursive (largestPrimeFactorRec) where
 
 smallestFactor :: Integer -> Integer
 smallestFactor n = sf n 2
@@ -16,5 +13,5 @@ primeFactorsRec n
   | n <= 1 = []
   | otherwise = let f = smallestFactor n in f : primeFactorsRec (n `div` f)
 
-main :: IO ()
-main = print (maximum (primeFactorsRec target))
+largestPrimeFactorRec :: Integer -> Integer
+largestPrimeFactorRec = maximum . primeFactorsRec
