@@ -1,7 +1,4 @@
-module Main where
-
-target :: Integer
-target = 600851475143
+module Euler3.TailRecursive (largestPrimeFactorTail) where
 
 primeFactorsTail :: Integer -> [Integer]
 primeFactorsTail n = go n 2 []
@@ -11,5 +8,5 @@ primeFactorsTail n = go n 2 []
       | m `mod` f == 0 = go (m `div` f) f (f : acc)
       | otherwise = go m (f + 1) acc
 
-main :: IO ()
-main = print (maximum (primeFactorsTail target))
+largestPrimeFactorTail :: Integer -> Integer
+largestPrimeFactorTail = maximum . primeFactorsTail

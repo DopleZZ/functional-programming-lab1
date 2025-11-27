@@ -1,7 +1,4 @@
-module Main where
-
-target :: Integer
-target = 600851475143
+module Euler3.Modular (largestPrimeFactorModular) where
 
 candidates :: Integer -> [Integer]
 candidates m = [2 .. floor (sqrt (fromIntegral m))]
@@ -16,9 +13,7 @@ isPrimeSimple n
   | even n = False
   | otherwise = null [x | x <- [3, 5 .. floor (sqrt (fromIntegral n))], n `mod` x == 0]
 
-main :: IO ()
-main = print (foldr max 1 primeDivisors)
+largestPrimeFactorModular :: Integer -> Integer
+largestPrimeFactorModular n = foldr max 1 divisors
   where
-    cs = candidates target
-    checked = zip cs (map (`isDivisor` target) cs)
-    primeDivisors = [c | (c, True) <- checked, isPrimeSimple c]
+    divisors = filter (`isDivisor` n) $ filter isPrimeSimple (candidates n)

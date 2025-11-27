@@ -1,7 +1,4 @@
-module Main where
-
-target :: Integer
-target = 1001
+module Euler28.TailRecursive (spiralSumTail) where
 
 spiralSumTail :: Integer -> Integer
 spiralSumTail n = go 1 1
@@ -14,5 +11,3 @@ spiralSumTail n = go 1 1
 cornerSum :: Integer -> Integer
 cornerSum k = 16 * k * k + 4 * k + 4
 
-main :: IO ()
-main = print (spiralSumTail target)

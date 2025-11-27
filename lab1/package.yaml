@@ -35,6 +35,21 @@ ghc-options:
 
 library:
   source-dirs: src
+  exposed-modules:
+    - Lib
+    - Euler3.TailRecursive
+    - Euler3.Recursive
+    - Euler3.Modular
+    - Euler3.MapBased
+    - Euler3.ListComp
+    - Euler3.InfinitePrimes
+    - Euler28.TailRecursive
+    - Euler28.Recursive
+    - Euler28.Modular
+    - Euler28.MapBased
+    - Euler28.ListComp
+    - Euler28.ClosedForm
+    - Euler28.Infinite
 
 executables:
   lab1-exe:
